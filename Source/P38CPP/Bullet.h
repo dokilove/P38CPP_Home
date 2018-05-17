@@ -37,4 +37,10 @@ public:
 
 	UFUNCTION()
 	void BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+		class UParticleSystem* Explosion;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+		class USoundBase* ExplosionSound;
 };

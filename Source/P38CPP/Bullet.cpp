@@ -6,6 +6,9 @@
 #include "UObject/ConstructorHelpers.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "Sound/SoundBase.h"
 
 
 // Sets default values
@@ -30,7 +33,19 @@ ABullet::ABullet()
 	Movement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Movement"));
 	Movement->InitialSpeed = 1000.0f;
 	Movement->MaxSpeed = 1000.0f;
-	Movement->ProjectileGravityScale = 0.0f;
+	Movement->ProjectileGravityScale = 0.4f;
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> P_Explosion(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Explosion.P_Explosion'"));
+	if (P_Explosion.Succeeded())
+	{
+		Explosion = P_Explosion.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> S_Explosion(TEXT("SoundCue'/Game/StarterContent/Audio/Explosion_Cue.Explosion_Cue'"));
+	if (S_Explosion.Succeeded())
+	{
+		ExplosionSound = S_Explosion.Object;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -66,6 +81,13 @@ void ABullet::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
 
 	if (Cast<APawn>(OtherActor) == nullptr)
 	{
-		UE_LOG(LogClass, Warning, TEXT("Overlap! %s"), *OtherActor->GetName());
+		//UE_LOG(LogClass, Warning, TEXT("Overlap! %s"), *OtherActor->GetName());
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Explosion,
+			GetActorLocation(), GetActorRotation(), true);
+
+		UGameplayStatics::SpawnSoundAtLocation(this,
+			ExplosionSound, GetActorLocation());
+
+		Destroy();
 	}
 }
